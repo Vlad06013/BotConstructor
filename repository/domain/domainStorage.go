@@ -1,8 +1,10 @@
 package domain
 
 import (
+	"fmt"
 	"time"
 
+	"github.com/Vlad06013/BotConstructor.git/domain/infrastructure/external/ApiClientBackend"
 	"github.com/jinzhu/gorm"
 )
 
@@ -45,18 +47,36 @@ func (r *Storage) GetDomainByID(id uint) (*Domains, error) {
 
 func (r *Storage) CreateDomain(id uint, domainName string) *Domains {
 
-	location, _ := time.LoadLocation("Europe/Moscow")
-	dateTime := time.Now().In(location).Format("2006-01-02 15:04:05")
+	//location, _ := time.LoadLocation("Europe/Moscow")
+	//dateTime := time.Now().In(location).Format("2006-01-02 15:04:05")
+	//
+	//domain := Domains{
+	//	ClientID:  id,
+	//	Domain:    domainName,
+	//	Active:    false,
+	//	Status:    "wait_connection",
+	//	CreatedAt: dateTime,
+	//	UpdatedAt: dateTime,
+	//}
+	//r.Create(&domain)
+	//return &domain
 
-	domain := Domains{
-		ClientID:  id,
-		Domain:    domainName,
-		Active:    false,
-		Status:    "wait_connection",
-		CreatedAt: dateTime,
-		UpdatedAt: dateTime,
+	url := fmt.Sprintf("domain")
+
+	params := map[string]interface{}{
+		"name":     domainName,
+		"clientID": id,
 	}
-	r.Create(&domain)
+
+	result := ApiClientBackend.Post(url, params)
+	var domain Domains
+	idFloat, _ := result.Data["id"].(float64)
+
+	domain = Domains{
+		ID:     uint(uint64(idFloat)),
+		Domain: result.Data["domain"].(string),
+	}
+
 	return &domain
 }
 
