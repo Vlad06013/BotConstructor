@@ -11,5 +11,7 @@ func main() {
 		panic(err)
 	}
 
+	//routes.InitRoutes()
 	useCase.Listen()
+
 }

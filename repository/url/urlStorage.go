@@ -1,39 +1,13 @@
 package url
 
 import (
-	"github.com/jinzhu/gorm"
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
 
 type Storage struct {
 	*gorm.DB
-}
-
-//
-//func (r *Storage) UpdateDomain(domain Urls) *Urls {
-//
-//	location, _ := time.LoadLocation("Europe/Moscow")
-//	dateTime := time.Now().In(location).Format("2006-01-02 15:04:05")
-//
-//	r.Save(&Urls{
-//		ID:        domain.ID,
-//		TgUserId:  domain.TgUserId,
-//		Domain:    domain.Domain,
-//		Active:    domain.Active,
-//		Status:    domain.Status,
-//		CreatedAt: domain.CreatedAt,
-//		UpdatedAt: dateTime,
-//	})
-//	return &domain
-//}
-
-func (r *Storage) GetUrlsByClientID(tgID uint) ([]Urls, error) {
-	var urls []Urls
-	if err := r.Find(&urls, "tg_user_id = ?", tgID).Error; err != nil {
-		return nil, err
-	}
-	r.Preload("Domain").Find(&urls)
-	return urls, nil
 }
 
 func (r *Storage) GetUrlByID(id uint) (*Urls, error) {
@@ -64,7 +38,6 @@ func (r *Storage) CreateUrl(url Urls) *Urls {
 
 	domain := Urls{
 		DomainId:    url.DomainId,
-		ClientId:    url.ClientId,
 		From:        url.From,
 		To:          url.To,
 		Description: url.Description,
@@ -82,4 +55,19 @@ func (r *Storage) UpdateUrlDestination(to string, urlId uint) {
 
 func (r *Storage) UpdateUrlComment(description string, urlId uint) {
 	r.Model(&Urls{}).Where("id =?", urlId).Update("description", description)
+}
+
+func (r *Storage) GetUrlsByClientID(tgID uint) ([]Urls, error) {
+	var urls []Urls
+
+	err := r.DB.
+		Joins("JOIN domains ON urls.domain_id = domains.id").
+		Preload("Domain").
+		Where("domains.client_id = ?", tgID).
+		Find(&urls).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return urls, nil
 }

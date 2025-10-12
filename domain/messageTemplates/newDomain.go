@@ -1,13 +1,13 @@
 package messageTemplates
 
 import (
-	"github.com/Vlad06013/BotConstructor.git/domain/module/api"
-	"github.com/Vlad06013/BotConstructor.git/repository/tgUser"
+	"github.com/Vlad06013/BotConstructor.git/domain/module/external"
+	"github.com/Vlad06013/BotConstructor.git/repository/telegramProfile"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/jinzhu/gorm"
 )
 
-func NewDomainMessage(client tgUser.Clients, conn *gorm.DB) api.TextMessage {
+func NewDomainMessage(client telegramProfile.TelegramProfile, conn *gorm.DB) external.TextMessage {
 	text := "Для начала работы вам нужно прикрепить к боту своё доменное имя "
 
 	buttons := tgbotapi.NewInlineKeyboardMarkup(
@@ -16,7 +16,7 @@ func NewDomainMessage(client tgUser.Clients, conn *gorm.DB) api.TextMessage {
 		),
 	)
 
-	mess := api.TextMessage{
+	mess := external.TextMessage{
 		Text:    text,
 		Buttons: buttons,
 		ChatId:  client.TgUserId,

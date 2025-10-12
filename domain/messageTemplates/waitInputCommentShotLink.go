@@ -1,17 +1,17 @@
 package messageTemplates
 
 import (
-	"github.com/Vlad06013/BotConstructor.git/domain/module/api"
-	"github.com/Vlad06013/BotConstructor.git/repository/tgUser"
+	"github.com/Vlad06013/BotConstructor.git/domain/module/external"
+	"github.com/Vlad06013/BotConstructor.git/repository/telegramProfile"
 	"github.com/jinzhu/gorm"
 )
 
-func WaitInputCommentShotLinkMessage(client tgUser.Clients, conn *gorm.DB) api.TextMessage {
+func WaitInputCommentShotLinkMessage(client telegramProfile.TelegramProfile, conn *gorm.DB) external.TextMessage {
 	text := "Тут ты можешь оставить коментарий, чтобы не забыть куда эта всратая ссылка ведет."
 	client.NextMessage = "save_input_comment_shot_link"
-	s := tgUser.Storage{DB: conn}
+	s := telegramProfile.Storage{DB: conn}
 	s.UpdateClient(client)
-	mess := api.TextMessage{
+	mess := external.TextMessage{
 		Text:   text,
 		ChatId: client.TgUserId,
 	}

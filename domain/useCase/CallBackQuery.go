@@ -1,18 +1,20 @@
 package useCase
 
 import (
-	"github.com/Vlad06013/BotConstructor.git/repository/tgUser"
+	"github.com/Vlad06013/BotConstructor.git/repository/telegramProfile"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/jinzhu/gorm"
 )
 
 func CallBackQuery(callBackQuery *tgbotapi.CallbackQuery, botAPI tgbotapi.BotAPI, conn *gorm.DB) {
 
-	s := tgUser.Storage{DB: conn}
-	client := s.InitClient(callBackQuery.From.ID, callBackQuery.From.UserName)
-	messageTemplate := findTemplate(callBackQuery.Data, *client, conn, &tgbotapi.Message{})
+	clientProfile := AuthClient(conn, callBackQuery.From.ID, callBackQuery.From.UserName)
 
-	deleteMessage(client.LastTgMessageId, client.TgUserId, botAPI)
+	messageTemplate := findTemplate(callBackQuery.Data, *clientProfile, conn, &tgbotapi.Message{})
+
+	deleteMessage(clientProfile.LastTgMessageId, clientProfile.TgUserId, botAPI)
 	result := send(&messageTemplate, botAPI)
-	s.UpdateLastMessageClient(result.MessageID, client.ID)
+	s := telegramProfile.Storage{DB: conn}
+
+	s.UpdateLastMessageClient(result.MessageID, clientProfile.ID)
 }

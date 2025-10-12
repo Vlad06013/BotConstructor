@@ -1,15 +1,16 @@
 package messageTemplates
 
 import (
-	"github.com/Vlad06013/BotConstructor.git/domain/module/api"
+	"strconv"
+
+	"github.com/Vlad06013/BotConstructor.git/domain/module/external"
 	"github.com/Vlad06013/BotConstructor.git/repository/domain"
-	"github.com/Vlad06013/BotConstructor.git/repository/tgUser"
+	"github.com/Vlad06013/BotConstructor.git/repository/telegramProfile"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/jinzhu/gorm"
-	"strconv"
 )
 
-func DeleteDomainMessage(client tgUser.Clients, conn *gorm.DB, domainId uint) api.TextMessage {
+func DeleteDomainMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, domainId uint) external.TextMessage {
 
 	s := domain.Storage{DB: conn}
 	domain, _ := s.GetDomainByID(domainId)
@@ -26,7 +27,7 @@ func DeleteDomainMessage(client tgUser.Clients, conn *gorm.DB, domainId uint) ap
 		),
 	)
 
-	mess := api.TextMessage{
+	mess := external.TextMessage{
 		Text:    text,
 		ChatId:  client.TgUserId,
 		Buttons: buttons,

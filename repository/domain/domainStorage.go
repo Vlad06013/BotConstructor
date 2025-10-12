@@ -1,8 +1,9 @@
 package domain
 
 import (
-	"github.com/jinzhu/gorm"
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
 
 type Storage struct {
@@ -16,7 +17,7 @@ func (r *Storage) UpdateDomain(domain Domains) *Domains {
 
 	r.Save(&Domains{
 		ID:        domain.ID,
-		TgUserId:  domain.TgUserId,
+		ClientID:  domain.ClientID,
 		Domain:    domain.Domain,
 		Active:    domain.Active,
 		Status:    domain.Status,
@@ -28,7 +29,7 @@ func (r *Storage) UpdateDomain(domain Domains) *Domains {
 
 func (r *Storage) GetDomainsByClientID(tgID uint) ([]Domains, error) {
 	var domains []Domains
-	if err := r.Find(&domains, "tg_user_id = ?", tgID).Error; err != nil {
+	if err := r.Find(&domains, "client_id = ?", tgID).Error; err != nil {
 		return nil, err
 	}
 	return domains, nil
@@ -48,10 +49,10 @@ func (r *Storage) CreateDomain(id uint, domainName string) *Domains {
 	dateTime := time.Now().In(location).Format("2006-01-02 15:04:05")
 
 	domain := Domains{
-		TgUserId:  id,
+		ClientID:  id,
 		Domain:    domainName,
 		Active:    false,
-		Status:    0,
+		Status:    "wait_connection",
 		CreatedAt: dateTime,
 		UpdatedAt: dateTime,
 	}

@@ -1,15 +1,16 @@
 package messageTemplates
 
 import (
-	"github.com/Vlad06013/BotConstructor.git/domain/module/api"
+	"strconv"
+
+	"github.com/Vlad06013/BotConstructor.git/domain/module/external"
 	"github.com/Vlad06013/BotConstructor.git/repository/domain"
-	"github.com/Vlad06013/BotConstructor.git/repository/tgUser"
+	"github.com/Vlad06013/BotConstructor.git/repository/telegramProfile"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/jinzhu/gorm"
-	"strconv"
 )
 
-func ChooseDomainToShotLinkMessage(client tgUser.Clients, conn *gorm.DB) api.TextMessage {
+func ChooseDomainToShotLinkMessage(client telegramProfile.TelegramProfile, conn *gorm.DB) external.TextMessage {
 	text := "Выберит домен для которого сокращаем ссылку"
 	s := domain.Storage{DB: conn}
 	var buttons [][]tgbotapi.InlineKeyboardButton
@@ -43,7 +44,7 @@ func ChooseDomainToShotLinkMessage(client tgUser.Clients, conn *gorm.DB) api.Tex
 
 	keyboard = tgbotapi.NewInlineKeyboardMarkup(buttons...)
 
-	mess := api.TextMessage{
+	mess := external.TextMessage{
 		Text:    text,
 		ChatId:  client.TgUserId,
 		Buttons: keyboard,

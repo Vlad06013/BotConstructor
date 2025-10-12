@@ -1,18 +1,18 @@
 package useCase
 
 import (
-	"github.com/Vlad06013/BotConstructor.git/repository/tgUser"
+	"github.com/Vlad06013/BotConstructor.git/repository/telegramProfile"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/jinzhu/gorm"
 )
 
 func TextMessage(message *tgbotapi.Message, botAPI tgbotapi.BotAPI, conn *gorm.DB) {
 
-	s := tgUser.Storage{DB: conn}
-	client := s.InitClient(message.From.ID, message.From.UserName)
-	messageTemplate := getMessageTemplate(*client, conn, message)
+	clientProfile := AuthClient(conn, message.From.ID, message.From.UserName)
+	messageTemplate := getMessageTemplate(*clientProfile, conn, message)
 
-	deleteMessage(client.LastTgMessageId, client.TgUserId, botAPI)
+	go deleteMessage(clientProfile.LastTgMessageId, clientProfile.TgUserId, botAPI)
 	result := send(&messageTemplate, botAPI)
-	s.UpdateLastMessageClient(result.MessageID, client.ID)
+	s := telegramProfile.Storage{DB: conn}
+	s.UpdateLastMessageClient(result.MessageID, clientProfile.ID)
 }

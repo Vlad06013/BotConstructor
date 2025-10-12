@@ -1,32 +1,36 @@
 package useCase
 
 import (
+	"fmt"
+	"log"
+
 	config "github.com/Vlad06013/BotConstructor.git"
 	"github.com/Vlad06013/BotConstructor.git/postgres"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/jinzhu/gorm"
-	"log"
 )
+
+var Bot tgbotapi.BotAPI
 
 func Listen() {
 
-	botApi, err := tgbotapi.NewBotAPI("7611597496:AAGlusMPbatLqb8eyM2pjutrQmwIC6o6wvk")
+	Bot, err := tgbotapi.NewBotAPI("8424114449:AAHxP8pajRHHC-C4OpaN4yl-NvMNlzJ-dzQ")
 	if err != nil {
 		log.Panic(err)
 	}
 
-	log.Printf("Authorized on account %s", botApi.Self.UserName)
+	log.Printf("Authorized on account %s", Bot.Self.UserName)
 
 	conn := ConnectDB()
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
-	updates := botApi.GetUpdatesChan(u)
+	updates := Bot.GetUpdatesChan(u)
 	for update := range updates {
 		if update.Message != nil {
-			//fmt.Println(update.)
+			fmt.Println(update.Message.Text)
 			//var output api.OutputMessage = api.TextMessage{
 			//	Text:    saa,
 			//	Bot:     *botApi,
@@ -34,10 +38,10 @@ func Listen() {
 			//	ChatId:  update.Message.Chat.ID,
 			//}
 			//output.Send()
-			TextMessage(update.Message, *botApi, conn)
+			TextMessage(update.Message, *Bot, conn)
 		}
 		if update.CallbackQuery != nil {
-			CallBackQuery(update.CallbackQuery, *botApi, conn)
+			CallBackQuery(update.CallbackQuery, *Bot, conn)
 			//bu.CallbackQueryMessageHandler(bot, update.CallbackQuery)
 		}
 		//if update.MyChatMember != nil {
@@ -46,6 +50,10 @@ func Listen() {
 		//	//	telegram.SetChatMember(db, *update.MyChatMember, *bot.Bot)
 		//}
 	}
+}
+
+func GetBot() tgbotapi.BotAPI {
+	return Bot
 }
 
 func ConnectDB() *gorm.DB {

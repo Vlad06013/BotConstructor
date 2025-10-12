@@ -1,23 +1,24 @@
 package useCase
 
 import (
-	"github.com/Vlad06013/BotConstructor.git/domain/messageTemplates"
-	"github.com/Vlad06013/BotConstructor.git/domain/module/api"
-	"github.com/Vlad06013/BotConstructor.git/repository/tgUser"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/jinzhu/gorm"
 	"strconv"
 	"strings"
+
+	"github.com/Vlad06013/BotConstructor.git/domain/messageTemplates"
+	"github.com/Vlad06013/BotConstructor.git/domain/module/external"
+	"github.com/Vlad06013/BotConstructor.git/repository/telegramProfile"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/jinzhu/gorm"
 )
 
-func send(messageTemplate *api.TextMessage, botApi tgbotapi.BotAPI) *tgbotapi.Message {
+func send(messageTemplate *external.TextMessage, botApi tgbotapi.BotAPI) *tgbotapi.Message {
 	messageTemplate.Bot = botApi
-	var output api.OutputMessage = messageTemplate
+	var output external.OutputMessage = messageTemplate
 	return output.Send()
 }
 
 func deleteMessage(messageId int, chatID int64, botApi tgbotapi.BotAPI) {
-	msg := api.DeleteMessage{
+	msg := external.DeleteMessage{
 		MessageID: messageId,
 		Bot:       botApi,
 		ChatId:    chatID,
@@ -25,7 +26,7 @@ func deleteMessage(messageId int, chatID int64, botApi tgbotapi.BotAPI) {
 	msg.DeleteMessage()
 }
 
-func getMessageTemplate(client tgUser.Clients, conn *gorm.DB, message *tgbotapi.Message) api.TextMessage {
+func getMessageTemplate(client telegramProfile.TelegramProfile, conn *gorm.DB, message *tgbotapi.Message) external.TextMessage {
 
 	if client.NextMessage != "" {
 		return findTemplate(client.NextMessage, client, conn, message)
@@ -37,7 +38,7 @@ func getMessageTemplate(client tgUser.Clients, conn *gorm.DB, message *tgbotapi.
 	}
 }
 
-func findTemplate(callBack string, client tgUser.Clients, conn *gorm.DB, message *tgbotapi.Message) api.TextMessage {
+func findTemplate(callBack string, client telegramProfile.TelegramProfile, conn *gorm.DB, message *tgbotapi.Message) external.TextMessage {
 
 	if callBack == "start" {
 		return messageTemplates.StartMessage(client, conn)

@@ -22,17 +22,17 @@ func SetEnvValues() error {
 	if err != nil {
 		return fmt.Errorf("Error setting port, err = %v", err)
 	}
-	err = os.Setenv("DB_NAME", "loogle")
+	err = os.Setenv("DB_NAME", "redirect_v2")
 	if err != nil {
 		return fmt.Errorf("Error setting port, err = %v", err)
 	}
 
-	err = os.Setenv("DB_USERNAME", "loogle")
+	err = os.Setenv("DB_USERNAME", "redirect_v2")
 	if err != nil {
 		return fmt.Errorf("Error setting port, err = %v", err)
 	}
 
-	err = os.Setenv("DB_PASSWORD", "eRfqV34gFza3gt!!L")
+	err = os.Setenv("DB_PASSWORD", "redirect_v2")
 	if err != nil {
 		return fmt.Errorf("Error setting port, err = %v", err)
 	}

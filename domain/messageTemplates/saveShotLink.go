@@ -1,17 +1,19 @@
 package messageTemplates
 
 import (
-	"github.com/Vlad06013/BotConstructor.git/domain/module/api"
-	"github.com/Vlad06013/BotConstructor.git/repository/domain"
-	"github.com/Vlad06013/BotConstructor.git/repository/url"
 	"strconv"
 
-	//"github.com/Vlad06013/BotConstructor.git/repository/domain"
-	"github.com/Vlad06013/BotConstructor.git/repository/tgUser"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/jinzhu/gorm"
+	"github.com/Vlad06013/BotConstructor.git/domain/module/external"
+	"github.com/Vlad06013/BotConstructor.git/repository/domain"
+	"github.com/Vlad06013/BotConstructor.git/repository/url"
+
 	"math/rand"
 	urlParsing "net/url"
+
+	//"github.com/Vlad06013/BotConstructor.git/repository/domain"
+	"github.com/Vlad06013/BotConstructor.git/repository/telegramProfile"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/jinzhu/gorm"
 )
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -34,7 +36,7 @@ func parseUrl(s string) (string, string) {
 	return u.Host, u.Path
 }
 
-func SaveInputShotLinkMessage(client tgUser.Clients, conn *gorm.DB, message *tgbotapi.Message, domainId uint) api.TextMessage {
+func SaveInputShotLinkMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, message *tgbotapi.Message, domainId uint) external.TextMessage {
 
 	s := url.Storage{DB: conn}
 	host, _ := parseUrl(message.Text)
@@ -42,7 +44,7 @@ func SaveInputShotLinkMessage(client tgUser.Clients, conn *gorm.DB, message *tgb
 	if host == "" {
 		text := "Неверная ссылка:  <b>" + message.Text + " </b> \n"
 
-		mess := api.TextMessage{
+		mess := external.TextMessage{
 			Text:   text,
 			ChatId: client.TgUserId,
 		}
@@ -56,7 +58,7 @@ func SaveInputShotLinkMessage(client tgUser.Clients, conn *gorm.DB, message *tgb
 	if domainFound == nil {
 		text := "Не найден подключенный домен:  <b>" + host + " </b> \n"
 
-		mess := api.TextMessage{
+		mess := external.TextMessage{
 			Text:   text,
 			ChatId: client.TgUserId,
 		}
@@ -66,7 +68,6 @@ func SaveInputShotLinkMessage(client tgUser.Clients, conn *gorm.DB, message *tgb
 
 	newUrl := url.Urls{
 		DomainId:    domainId,
-		ClientId:    client.ID,
 		From:        shotLink,
 		To:          message.Text,
 		Description: "",
@@ -75,7 +76,7 @@ func SaveInputShotLinkMessage(client tgUser.Clients, conn *gorm.DB, message *tgb
 	s.CreateUrl(newUrl)
 
 	client.NextMessage = ""
-	c := tgUser.Storage{DB: conn}
+	c := telegramProfile.Storage{DB: conn}
 	c.UpdateClient(client)
 
 	text := "Вот твоя ссылка пидарас:  <b>https://" + domainFound.Domain + "/" + shotLink + " </b> \n" +
@@ -92,7 +93,7 @@ func SaveInputShotLinkMessage(client tgUser.Clients, conn *gorm.DB, message *tgb
 			tgbotapi.NewInlineKeyboardButtonData("В кабинет", "cabinet"),
 		),
 	)
-	mess := api.TextMessage{
+	mess := external.TextMessage{
 		Text:    text,
 		ChatId:  client.TgUserId,
 		Buttons: buttons,

@@ -1,15 +1,16 @@
 package messageTemplates
 
 import (
-	"github.com/Vlad06013/BotConstructor.git/domain/module/api"
-	"github.com/Vlad06013/BotConstructor.git/repository/tgUser"
+	"strconv"
+
+	"github.com/Vlad06013/BotConstructor.git/domain/module/external"
+	"github.com/Vlad06013/BotConstructor.git/repository/telegramProfile"
 	"github.com/Vlad06013/BotConstructor.git/repository/url"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/jinzhu/gorm"
-	"strconv"
 )
 
-func DeleteLinkMessage(client tgUser.Clients, conn *gorm.DB, urlId uint) api.TextMessage {
+func DeleteLinkMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, urlId uint) external.TextMessage {
 
 	s := url.Storage{DB: conn}
 	url, _ := s.GetUrlByID(urlId)
@@ -26,7 +27,7 @@ func DeleteLinkMessage(client tgUser.Clients, conn *gorm.DB, urlId uint) api.Tex
 		),
 	)
 
-	mess := api.TextMessage{
+	mess := external.TextMessage{
 		Text:    text,
 		ChatId:  client.TgUserId,
 		Buttons: buttons,

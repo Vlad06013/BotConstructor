@@ -1,14 +1,14 @@
-package api
+package external
 
 import (
 	"fmt"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type TextMessage struct {
-	Text string
-	Bot  tgbotapi.BotAPI
-	//Buttons []tgbotapi.InlineKeyboardButton
+	Text    string
+	Bot     tgbotapi.BotAPI
 	Buttons tgbotapi.InlineKeyboardMarkup
 	ChatId  int64
 }
