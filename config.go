@@ -32,7 +32,7 @@ func SetEnvValues() error {
 		return fmt.Errorf("Error setting port, err = %v", err)
 	}
 
-	err = os.Setenv("DB_PASSWORD", "redirect_v2")
+	err = os.Setenv("DB_PASSWORD", "lSj4jdfgi!p_3")
 	if err != nil {
 		return fmt.Errorf("Error setting port, err = %v", err)
 	}
