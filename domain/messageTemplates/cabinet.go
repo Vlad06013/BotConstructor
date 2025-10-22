@@ -16,7 +16,6 @@ func CabinetMessage(client telegramProfile.TelegramProfile, conn *gorm.DB) exter
 
 	buttons := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			//tgbotapi.NewInlineKeyboardButtonData("Сократить ссылку", "shotLink"),
 			tgbotapi.NewInlineKeyboardButtonData("Сократить ссылку", "chooseDomainToShotLink"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
@@ -25,9 +24,9 @@ func CabinetMessage(client telegramProfile.TelegramProfile, conn *gorm.DB) exter
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Управление доменами", "domainSettings"),
 		),
-		//tgbotapi.NewInlineKeyboardRow(
-		//	tgbotapi.NewInlineKeyboardButtonData("ТАРИФЫ", "tariffSettings"),
-		//),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Тарифы", "tariffSettings"),
+		),
 	)
 
 	mess := external.TextMessage{

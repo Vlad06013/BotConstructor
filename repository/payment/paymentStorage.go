@@ -1,0 +1,42 @@
+package payment
+
+import (
+	"encoding/json"
+	"fmt"
+	"strconv"
+
+	"github.com/Vlad06013/BotConstructor.git/domain/infrastructure/external/ApiClientBackend"
+	"github.com/jinzhu/gorm"
+)
+
+type Storage struct {
+	*gorm.DB
+}
+
+func (r *Storage) Create(tgUserId int64, tariffId uint) (Payment, error) {
+	var payment Payment
+	url := fmt.Sprintf("order")
+	body := map[string]interface{}{
+		"tariff_id": tariffId,
+	}
+
+	headers := map[string]interface{}{
+		"auth-telegram-id": strconv.FormatUint(uint64(tgUserId), 10),
+	}
+	result := ApiClientBackend.Post(url, body, headers)
+
+	var dataMap map[string]json.RawMessage
+	err := json.Unmarshal(result.Data, &dataMap)
+	if err != nil {
+		// Обработка ошибочного случая
+	}
+
+	if paymentData, exists := dataMap["payment"]; exists {
+		err = json.Unmarshal(paymentData, &payment)
+		if err != nil {
+			// обработка ошибки
+		}
+	}
+
+	return payment, nil
+}

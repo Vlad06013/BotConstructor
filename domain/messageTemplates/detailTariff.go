@@ -1,6 +1,8 @@
 package messageTemplates
 
 import (
+	"strconv"
+
 	"github.com/Vlad06013/BotConstructor.git/domain/module/external"
 	"github.com/Vlad06013/BotConstructor.git/repository/tariff"
 	"github.com/Vlad06013/BotConstructor.git/repository/telegramProfile"
@@ -11,14 +13,24 @@ import (
 func DetailTariffMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, tariffId uint) external.TextMessage {
 
 	s := tariff.Storage{DB: conn}
-	tariff, _ := s.GetById(tariffId)
-	text := "<b>Тариф:</b>\n" + tariff.Name + "\n\n<b>Подробнее:</b>\n" + tariff.Description
+	currentTariff, _ := s.GetById(tariffId)
+	text := "<b>Тариф:</b> " + currentTariff.Name +
+		"\n<b>Стоимость:</b> " + strconv.Itoa(int(currentTariff.Price)) + " " + currentTariff.Currency +
+		"\n<b>Кол-во доменов: </b>" + strconv.Itoa(int(currentTariff.DomainsCount)) +
+		"\n<b>Кол-во сокращений для одного домена: </b>" + strconv.Itoa(int(currentTariff.LinksForDomainCount))
+
 	buttons := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Подключить тариф", "tariffConnect|"+strconv.FormatUint(uint64(tariffId), 10)),
+		),
+		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", "tariffSettings"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В кабинет", "cabinet"),
 		),
 	)
+
 	mess := external.TextMessage{
 		Text:    text,
 		ChatId:  client.TgUserId,

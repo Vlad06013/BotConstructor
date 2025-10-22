@@ -11,19 +11,24 @@ import (
 )
 
 func TariffsSettingsMessage(client telegramProfile.TelegramProfile, conn *gorm.DB) external.TextMessage {
-	text := "Плоти деньги чорт блять"
 
+	text := "у вас нет подключенного тарифа"
 	var buttons [][]tgbotapi.InlineKeyboardButton
 	var keyboard tgbotapi.InlineKeyboardMarkup
 	backBtnCB := "cabinet"
 	s := tariff.Storage{DB: conn}
 
 	tariffs, _ := s.Get()
+	myActiveTariffs, _ := s.GetMy(client.TgUserId)
+	if myActiveTariffs != nil {
+		text = "<b>Текущий тариф:</b> " + myActiveTariffs.Name +
+			"\n<b>Стоимость:</b> " + strconv.Itoa(int(myActiveTariffs.Price)) + " " + myActiveTariffs.Currency +
+			"\n<b>Кол-во доменов: </b>" + strconv.Itoa(int(myActiveTariffs.DomainsCount)) +
+			"\n<b>Кол-во сокращений для одного домена: </b>" + strconv.Itoa(int(myActiveTariffs.LinksForDomainCount)) +
+			"\n<b>Действителен до : </b>" + myActiveTariffs.End
 
-	if len(tariffs) == 0 {
-		text = "Нет актиывных тарифов"
 	}
-	//rows := make([][]tgbotapi.InlineKeyboardButton, 1)
+
 	rows := make([][]tgbotapi.InlineKeyboardButton, len(tariffs)+1)
 
 	for i := 0; i < len(tariffs); i++ {

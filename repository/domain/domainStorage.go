@@ -1,7 +1,9 @@
 package domain
 
 import (
+	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/Vlad06013/BotConstructor.git/domain/infrastructure/external/ApiClientBackend"
@@ -45,36 +47,32 @@ func (r *Storage) GetDomainByID(id uint) (*Domains, error) {
 	return &domain, nil
 }
 
-func (r *Storage) CreateDomain(id uint, domainName string) *Domains {
-
-	//location, _ := time.LoadLocation("Europe/Moscow")
-	//dateTime := time.Now().In(location).Format("2006-01-02 15:04:05")
-	//
-	//domain := Domains{
-	//	ClientID:  id,
-	//	Domain:    domainName,
-	//	Active:    false,
-	//	Status:    "wait_connection",
-	//	CreatedAt: dateTime,
-	//	UpdatedAt: dateTime,
-	//}
-	//r.Create(&domain)
-	//return &domain
+func (r *Storage) CreateDomain(tgUserId int64, domainName string) *Domains {
 
 	url := fmt.Sprintf("domain")
 
 	params := map[string]interface{}{
-		"name":     domainName,
-		"clientID": id,
+		"name": domainName,
 	}
 
-	result := ApiClientBackend.Post(url, params)
+	headers := map[string]interface{}{
+		"auth-telegram-id": strconv.FormatUint(uint64(tgUserId), 10),
+	}
+	//
+	result := ApiClientBackend.Post(url, params, headers)
 	var domain Domains
-	idFloat, _ := result.Data["id"].(float64)
 
-	domain = Domains{
-		ID:     uint(uint64(idFloat)),
-		Domain: result.Data["domain"].(string),
+	var dataMap map[string]json.RawMessage
+	err := json.Unmarshal(result.Data, &dataMap)
+	if err != nil {
+		// Обработка ошибочного случая
+	}
+
+	if domainData, exists := dataMap["domain"]; exists {
+		err = json.Unmarshal(domainData, &domain)
+		if err != nil {
+			// обработка ошибки
+		}
 	}
 
 	return &domain

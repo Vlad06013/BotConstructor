@@ -13,7 +13,7 @@ func SaveInputDomainMessage(client telegramProfile.TelegramProfile, conn *gorm.D
 		"Когда домен привяжется, тебе петуху придет уведомление от бота"
 
 	s := domain.Storage{DB: conn}
-	s.CreateDomain(client.ID, message.Text)
+	s.CreateDomain(client.TgUserId, message.Text)
 
 	client.NextMessage = ""
 	c := telegramProfile.Storage{DB: conn}

@@ -13,14 +13,14 @@ import (
 func DeleteDomainMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, domainId uint) external.TextMessage {
 
 	s := domain.Storage{DB: conn}
-	domain, _ := s.GetDomainByID(domainId)
-	if domain == nil {
+	currentDomain, _ := s.GetDomainByID(domainId)
+	if currentDomain == nil {
 	}
 	text := "Братишка ты уверен? Это полностью удалит информацию об этом редиректе из нашего бота и все ссылки которые были прикриплены к этому домену"
 
 	buttons := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Удалить", "confirmDeleteDomain|"+strconv.FormatUint(uint64(domain.ID), 10)),
+			tgbotapi.NewInlineKeyboardButtonData("Удалить", "confirmDeleteDomain|"+strconv.FormatUint(uint64(currentDomain.ID), 10)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", "domainSettings"),
