@@ -26,14 +26,9 @@ func DetailTariffMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, 
 		))
 	}
 
-	domainsCount := strconv.Itoa(int(currentTariff.DomainsCount))
-	if currentTariff.DomainsUnlimited == true {
-		domainsCount = "Безлимит"
-	}
-
 	text = text + "<b>Тариф:</b> " + currentTariff.Name +
 		"\n<b>Стоимость:</b> " + strconv.Itoa(int(currentTariff.Price)) + " " + currentTariff.Currency +
-		"\n<b>Кол-во доменов: </b>" + domainsCount +
+		"\n<b>Кол-во доменов: </b>" + strconv.Itoa(int(currentTariff.DomainsCount)) +
 		"\n<b>Кол-во сокращений для одного домена: </b>" + strconv.Itoa(int(currentTariff.LinksLimit))
 
 	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(

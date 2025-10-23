@@ -15,33 +15,28 @@ func TariffsSettingsMessage(client telegramProfile.TelegramProfile, conn *gorm.D
 	text := "у вас нет подключенного тарифа"
 	var buttons [][]tgbotapi.InlineKeyboardButton
 	var keyboard tgbotapi.InlineKeyboardMarkup
-	backBtnCB := "cabinet"
 	s := tariff.Storage{DB: conn}
 
 	tariffs, _ := s.Get(client.TgUserId)
-	rows := make([][]tgbotapi.InlineKeyboardButton, len(tariffs)+1)
 
 	for i := 0; i < len(tariffs); i++ {
 		if tariffs[i].IsMy {
 			text = "<b>Текущий тариф:</b> " + tariffs[i].Name +
 				"\n<b>Стоимость:</b> " + strconv.Itoa(int(tariffs[i].Price)) + " " + tariffs[i].Currency +
 				"\n<b>Кол-во доменов: </b>" + strconv.Itoa(int(tariffs[i].DomainsCount)) +
-				"\n<b>Кол-во сокращений для одного домена: </b>" + strconv.Itoa(int(tariffs[i].LinksLimit)) +
+				"\n<b>Кол-во сокращений: </b>" + strconv.Itoa(int(tariffs[i].LinksLimit)) +
 				"\n<b>Действителен до : </b>" + tariffs[i].End
-		}
 
-		callbackData := "detailTariff|" + strconv.FormatUint(uint64(tariffs[i].ID), 10)
-		btnText := tariffs[i].Name
-		rows[i] = tgbotapi.NewInlineKeyboardRow(tgbotapi.InlineKeyboardButton{
-			Text:         btnText,
-			CallbackData: &callbackData,
-		})
+		} else {
+			buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData(tariffs[i].Name, "detailTariff|"+strconv.FormatUint(uint64(tariffs[i].ID), 10)),
+			))
+		}
 	}
-	rows[len(tariffs)] = tgbotapi.NewInlineKeyboardRow(tgbotapi.InlineKeyboardButton{
-		Text:         "В кабинет",
-		CallbackData: &backBtnCB,
-	})
-	buttons = rows
+
+	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("В кабинет", "cabinet"),
+	))
 
 	keyboard = tgbotapi.NewInlineKeyboardMarkup(buttons...)
 

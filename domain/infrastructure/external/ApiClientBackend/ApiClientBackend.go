@@ -24,7 +24,7 @@ func send(uri string, method string, body interface{}, headers interface{}) (res
 	jsonData, err := json.Marshal(body)
 
 	req, err := http.NewRequest(method, url+uri, bytes.NewBuffer(jsonData))
-	fmt.Println(jsonData)
+	//fmt.Println(jsonData)
 
 	// Устанавливаем заголовки
 	req.Header.Set("Content-Type", "application/json")
@@ -44,6 +44,7 @@ func send(uri string, method string, body interface{}, headers interface{}) (res
 	}
 
 	if resp.StatusCode != http.StatusOK {
+
 		fmt.Println("Получен неожиданный статус:", resp.Status)
 		defer resp.Body.Close()
 

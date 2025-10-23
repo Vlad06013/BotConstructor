@@ -44,6 +44,10 @@ func findTemplate(callBack string, client telegramProfile.TelegramProfile, conn 
 		return messageTemplates.StartMessage(client, conn)
 	}
 
+	if callBack == "start_free_period" {
+		return messageTemplates.StartFreePeriodMessage(client, conn)
+	}
+
 	if callBack == "new_domain" {
 		return messageTemplates.NewDomainMessage(client, conn)
 	}
