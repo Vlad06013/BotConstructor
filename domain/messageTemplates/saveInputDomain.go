@@ -9,7 +9,7 @@ import (
 )
 
 func SaveInputDomainMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, message *tgbotapi.Message) external.TextMessage {
-	text := "Заебись братишка, ы сохранили твой домен <b>" + message.Text + " </b> теперь можешь пойти расслабиться поесть пряников или подрочить на хентай, или чем вы там маркетологи ебаные занимаетесь.\n " +
+	text := "Заебись братишка, ты сохранили твой домен <b>" + message.Text + " </b> теперь можешь пойти расслабиться поесть пряников или подрочить на хентай, или чем вы там маркетологи ебаные занимаетесь.\n " +
 		"Когда домен привяжется, тебе петуху придет уведомление от бота"
 
 	s := domain.Storage{DB: conn}

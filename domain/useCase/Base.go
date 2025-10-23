@@ -91,10 +91,6 @@ func findTemplate(callBack string, client telegramProfile.TelegramProfile, conn 
 		return messageTemplates.TariffsSettingsMessage(client, conn)
 	}
 
-	//if callBack == "tariffConnect" {
-	//	return messageTemplates.TariffConnectMessage(client, conn)
-	//}
-
 	if strings.Contains(callBack, "detailLink") {
 		res := strings.Split(callBack, "|")
 		u64, _ := strconv.ParseUint(res[1], 10, 32)
@@ -166,10 +162,10 @@ func findTemplate(callBack string, client telegramProfile.TelegramProfile, conn 
 		return messageTemplates.TariffConnectMessage(client, conn, uint(tariffId))
 	}
 
-	if strings.Contains(callBack, "createOrder") {
+	if strings.Contains(callBack, "buyTariff") {
 		res := strings.Split(callBack, "|")
 		tariffId, _ := strconv.ParseUint(res[1], 10, 32)
-		return messageTemplates.CreateOrder(client, conn, uint(tariffId))
+		return messageTemplates.BuyTariff(client, conn, uint(tariffId))
 	}
 
 	return messageTemplates.StartMessage(client, conn)

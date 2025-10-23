@@ -13,12 +13,14 @@ type Storage struct {
 	*gorm.DB
 }
 
-func (r *Storage) Get() ([]Tariffs, error) {
+func (r *Storage) Get(tgUserId int64) ([]Tariffs, error) {
 	var tariffs []Tariffs
 
 	url := fmt.Sprintf("tariff")
 
-	headers := map[string]interface{}{}
+	headers := map[string]interface{}{
+		"auth-telegram-id": strconv.FormatUint(uint64(tgUserId), 10),
+	}
 	result := ApiClientBackend.Get(url, headers)
 
 	var dataMap map[string]json.RawMessage
@@ -43,12 +45,32 @@ func (r *Storage) Get() ([]Tariffs, error) {
 
 }
 
-func (r *Storage) GetById(tariffId uint) (*Tariffs, error) {
-	var tariffs Tariffs
-	if err := r.First(&tariffs, "id = ?", tariffId).Error; err != nil {
-		return nil, err
+func (r *Storage) GetById(tgUserId int64, tariffId uint) (*Tariffs, error) {
+
+	var tariff Tariffs
+	url := fmt.Sprintf("tariff/" + strconv.FormatUint(uint64(tariffId), 10))
+
+	headers := map[string]interface{}{
+		"auth-telegram-id": strconv.FormatUint(uint64(tgUserId), 10),
 	}
-	return &tariffs, nil
+
+	result := ApiClientBackend.Get(url, headers)
+
+	var dataMap map[string]json.RawMessage
+	err := json.Unmarshal(result.Data, &dataMap)
+	if err != nil {
+		// Обработка ошибочного случая
+	}
+
+	if tariffData, exists := dataMap["tariff"]; exists {
+		err = json.Unmarshal(tariffData, &tariff)
+		if err != nil {
+			return nil, nil
+		}
+		return &tariff, nil
+
+	}
+	return nil, nil
 }
 
 func (r *Storage) GetMy(tgUserId int64) (*MyTariff, error) {

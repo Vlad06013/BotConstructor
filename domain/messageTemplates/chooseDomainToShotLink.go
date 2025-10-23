@@ -11,7 +11,7 @@ import (
 )
 
 func ChooseDomainToShotLinkMessage(client telegramProfile.TelegramProfile, conn *gorm.DB) external.TextMessage {
-	text := "Выберит домен для которого сокращаем ссылку"
+	text := "Выберите домен для которого сокращаем ссылку"
 	s := domain.Storage{DB: conn}
 	var buttons [][]tgbotapi.InlineKeyboardButton
 	var keyboard tgbotapi.InlineKeyboardMarkup

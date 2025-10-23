@@ -12,13 +12,13 @@ import (
 
 func TariffConnectMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, tariffId uint) external.TextMessage {
 	s := tariff.Storage{DB: conn}
-	currentTariff, _ := s.GetById(tariffId)
+	currentTariff, _ := s.GetById(client.TgUserId, tariffId)
 
 	text := "Будет подключен тариф " + currentTariff.Name + ". К оплате: " + strconv.Itoa(int(currentTariff.Price)) + " " + currentTariff.Currency
 
 	buttons := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Подключаем тариф", "createOrder|"+strconv.FormatUint(uint64(tariffId), 10)),
+			tgbotapi.NewInlineKeyboardButtonData("Подключаем тариф", "buyTariff|"+strconv.FormatUint(uint64(tariffId), 10)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В кабинет", "cabinet"),

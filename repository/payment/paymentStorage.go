@@ -13,9 +13,9 @@ type Storage struct {
 	*gorm.DB
 }
 
-func (r *Storage) Create(tgUserId int64, tariffId uint) (Payment, error) {
+func (r *Storage) TariffPayment(tgUserId int64, tariffId uint) (Payment, error) {
 	var payment Payment
-	url := fmt.Sprintf("order")
+	url := fmt.Sprintf("order/buy-tariff")
 	body := map[string]interface{}{
 		"tariff_id": tariffId,
 	}

@@ -13,28 +13,40 @@ import (
 func DetailTariffMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, tariffId uint) external.TextMessage {
 
 	s := tariff.Storage{DB: conn}
-	currentTariff, _ := s.GetById(tariffId)
-	text := "<b>Тариф:</b> " + currentTariff.Name +
-		"\n<b>Стоимость:</b> " + strconv.Itoa(int(currentTariff.Price)) + " " + currentTariff.Currency +
-		"\n<b>Кол-во доменов: </b>" + strconv.Itoa(int(currentTariff.DomainsCount)) +
-		"\n<b>Кол-во сокращений для одного домена: </b>" + strconv.Itoa(int(currentTariff.LinksForDomainCount))
+	currentTariff, _ := s.GetById(client.TgUserId, tariffId)
+	var text string
+	var buttons [][]tgbotapi.InlineKeyboardButton
+	var keyboard tgbotapi.InlineKeyboardMarkup
 
-	buttons := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
+	if currentTariff.IsMy == true {
+		text = "<b>Подключен у вас</b>\n\n"
+	} else {
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Подключить тариф", "tariffConnect|"+strconv.FormatUint(uint64(tariffId), 10)),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Назад", "tariffSettings"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("В кабинет", "cabinet"),
-		),
-	)
+		))
+	}
+
+	domainsCount := strconv.Itoa(int(currentTariff.DomainsCount))
+	if currentTariff.DomainsUnlimited == true {
+		domainsCount = "Безлимит"
+	}
+
+	text = text + "<b>Тариф:</b> " + currentTariff.Name +
+		"\n<b>Стоимость:</b> " + strconv.Itoa(int(currentTariff.Price)) + " " + currentTariff.Currency +
+		"\n<b>Кол-во доменов: </b>" + domainsCount +
+		"\n<b>Кол-во сокращений для одного домена: </b>" + strconv.Itoa(int(currentTariff.LinksLimit))
+
+	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Назад", "tariffSettings"),
+		tgbotapi.NewInlineKeyboardButtonData("В кабинет", "cabinet"),
+	))
+
+	keyboard = tgbotapi.NewInlineKeyboardMarkup(buttons...)
 
 	mess := external.TextMessage{
 		Text:    text,
 		ChatId:  client.TgUserId,
-		Buttons: buttons,
+		Buttons: keyboard,
 	}
 	return mess
 }

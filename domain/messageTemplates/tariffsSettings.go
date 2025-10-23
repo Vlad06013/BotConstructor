@@ -18,20 +18,18 @@ func TariffsSettingsMessage(client telegramProfile.TelegramProfile, conn *gorm.D
 	backBtnCB := "cabinet"
 	s := tariff.Storage{DB: conn}
 
-	tariffs, _ := s.Get()
-	myActiveTariffs, _ := s.GetMy(client.TgUserId)
-	if myActiveTariffs != nil {
-		text = "<b>Текущий тариф:</b> " + myActiveTariffs.Name +
-			"\n<b>Стоимость:</b> " + strconv.Itoa(int(myActiveTariffs.Price)) + " " + myActiveTariffs.Currency +
-			"\n<b>Кол-во доменов: </b>" + strconv.Itoa(int(myActiveTariffs.DomainsCount)) +
-			"\n<b>Кол-во сокращений для одного домена: </b>" + strconv.Itoa(int(myActiveTariffs.LinksForDomainCount)) +
-			"\n<b>Действителен до : </b>" + myActiveTariffs.End
-
-	}
-
+	tariffs, _ := s.Get(client.TgUserId)
 	rows := make([][]tgbotapi.InlineKeyboardButton, len(tariffs)+1)
 
 	for i := 0; i < len(tariffs); i++ {
+		if tariffs[i].IsMy {
+			text = "<b>Текущий тариф:</b> " + tariffs[i].Name +
+				"\n<b>Стоимость:</b> " + strconv.Itoa(int(tariffs[i].Price)) + " " + tariffs[i].Currency +
+				"\n<b>Кол-во доменов: </b>" + strconv.Itoa(int(tariffs[i].DomainsCount)) +
+				"\n<b>Кол-во сокращений для одного домена: </b>" + strconv.Itoa(int(tariffs[i].LinksLimit)) +
+				"\n<b>Действителен до : </b>" + tariffs[i].End
+		}
+
 		callbackData := "detailTariff|" + strconv.FormatUint(uint64(tariffs[i].ID), 10)
 		btnText := tariffs[i].Name
 		rows[i] = tgbotapi.NewInlineKeyboardRow(tgbotapi.InlineKeyboardButton{

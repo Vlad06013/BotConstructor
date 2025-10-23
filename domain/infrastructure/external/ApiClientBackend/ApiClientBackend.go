@@ -18,7 +18,7 @@ type ApiResponse struct {
 var url = "http://127.0.0.1/api/telegram-bot/v1/"
 
 func send(uri string, method string, body interface{}, headers interface{}) (response *http.Response, err error) {
-	fmt.Println("отправка запроса:", url+uri)
+	fmt.Println("отправка запроса:", method, " ", url+uri)
 	var resp *http.Response
 
 	jsonData, err := json.Marshal(body)
