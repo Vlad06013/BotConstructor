@@ -1,22 +1,18 @@
-package messageTemplates
+package linksTemplates
 
 import (
 	"github.com/Vlad06013/BotConstructor.git/domain/module/external"
-	"github.com/Vlad06013/BotConstructor.git/repository/domain"
 	"github.com/Vlad06013/BotConstructor.git/repository/telegramProfile"
+	"github.com/Vlad06013/BotConstructor.git/repository/url"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/jinzhu/gorm"
 )
 
-func ConfirmDeleteDomainMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, domainId uint) external.TextMessage {
+func ConfirmDeleteLinkMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, urlId uint) external.TextMessage {
 
-	d := domain.Storage{DB: conn}
-	deleted := d.DeleteDomainByID(client.TgUserId, domainId)
+	s := url.Storage{DB: conn}
+	s.DeleteUrlByID(urlId)
 	text := "Окей мы всё нахуй удалили. Иди нахуй"
-
-	if !deleted {
-		text = "Ошибка удаления. Иди нахуй"
-	}
 
 	buttons := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(

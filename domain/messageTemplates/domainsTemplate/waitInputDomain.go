@@ -1,4 +1,4 @@
-package messageTemplates
+package domainsTemplate
 
 import (
 	"github.com/Vlad06013/BotConstructor.git/domain/module/external"

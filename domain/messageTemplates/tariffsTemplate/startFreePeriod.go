@@ -1,4 +1,4 @@
-package messageTemplates
+package tariffsTemplate
 
 import (
 	"strconv"

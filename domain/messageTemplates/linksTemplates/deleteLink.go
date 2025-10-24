@@ -1,4 +1,4 @@
-package messageTemplates
+package linksTemplates
 
 import (
 	"strconv"
@@ -10,24 +10,27 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func ChangeLinkDestinationMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, urlId uint) external.TextMessage {
+func DeleteLinkMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, urlId uint) external.TextMessage {
+
 	var text string
 	s := url.Storage{DB: conn}
-
 	currentUrl, _ := s.GetUrlByID(urlId)
-	if currentUrl != nil {
-		text = "Окей нахуй, введи сюда новую конечную точнку для ссылки " + currentUrl.From
-	} else {
+	if currentUrl == nil {
 		text = "Ошибка"
+
+	} else {
+		text = "Удалить ссылку " + currentUrl.From + "\n Которая ведет сюда: \n" + currentUrl.To
 	}
+	//text := "Удалить ссылку https://" + url.Domain.Domain + "/" + currentUrl.From + "\n Которая ведет сюда: \n" + currentUrl.To
+
 	buttons := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Удалить", "confirmDeleteLink|"+strconv.FormatUint(uint64(currentUrl.ID), 10)),
+		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В кабинет", "cabinet"),
 		),
 	)
-	client.NextMessage = "save_destination_link|" + strconv.FormatUint(uint64(currentUrl.ID), 10)
-	c := telegramProfile.Storage{DB: conn}
-	c.UpdateClient(client)
 
 	mess := external.TextMessage{
 		Text:    text,

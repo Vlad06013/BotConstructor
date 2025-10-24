@@ -1,4 +1,4 @@
-package messageTemplates
+package domainsTemplate
 
 import (
 	"strconv"
@@ -26,7 +26,7 @@ func DetailDomainMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, 
 		text = "Нет подключенных ссылок"
 	}
 	for i := 0; i < len(urls); i++ {
-		btnText := "https://" + domainCurrent.Domain + "/" + urls[i].From + "|" + urls[i].Description
+		btnText := urls[i].From + "|" + urls[i].Description
 		if urls[i].Active == true {
 			btnText = "✅ " + btnText
 		} else {

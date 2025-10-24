@@ -1,4 +1,4 @@
-package messageTemplates
+package domainsTemplate
 
 import (
 	"github.com/Vlad06013/BotConstructor.git/domain/module/external"
@@ -10,10 +10,6 @@ import (
 func ConnectDomainMessage(client telegramProfile.TelegramProfile, conn *gorm.DB) external.TextMessage {
 	text := "Для парковки вашего домена, откройте личный кабинет на сайте регистраторе и пропишите a-name запись вашего домена на наш IP адрес - 88.888.888.888"
 
-	//buttons := []tgbotapi.InlineKeyboardButton{
-	//	tgbotapi.NewInlineKeyboardButtonData("Я сделяль!", "wait_input_domain"),
-	//	tgbotapi.NewInlineKeyboardButtonData("Назад", "new_domain"),
-	//}
 	buttons := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Я сделяль!", "wait_input_domain"),

@@ -1,4 +1,4 @@
-package messageTemplates
+package linksTemplates
 
 import (
 	"strconv"

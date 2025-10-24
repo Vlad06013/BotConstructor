@@ -1,4 +1,4 @@
-package messageTemplates
+package linksTemplates
 
 import (
 	"strconv"
@@ -10,20 +10,22 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func ChangeLinkCommentMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, urlId uint) external.TextMessage {
-
+func ChangeLinkDestinationMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, urlId uint) external.TextMessage {
+	var text string
 	s := url.Storage{DB: conn}
-	url, _ := s.GetUrlByID(urlId)
-	if url == nil {
 
+	currentUrl, _ := s.GetUrlByID(urlId)
+	if currentUrl != nil {
+		text = "Окей нахуй, введи сюда новую конечную точнку для ссылки " + currentUrl.From
+	} else {
+		text = "Ошибка"
 	}
-	text := "Окей нахуй, введи сюда комментарий для ссылки \n" + url.From
 	buttons := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В кабинет", "cabinet"),
 		),
 	)
-	client.NextMessage = "save_comment_link|" + strconv.FormatUint(uint64(url.ID), 10)
+	client.NextMessage = "save_destination_link|" + strconv.FormatUint(uint64(currentUrl.ID), 10)
 	c := telegramProfile.Storage{DB: conn}
 	c.UpdateClient(client)
 
