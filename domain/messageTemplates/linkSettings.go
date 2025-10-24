@@ -16,36 +16,30 @@ func LinkSettingsMessage(client telegramProfile.TelegramProfile, conn *gorm.DB) 
 	s := url.Storage{DB: conn}
 	var buttons [][]tgbotapi.InlineKeyboardButton
 	var keyboard tgbotapi.InlineKeyboardMarkup
-	backBtnCB := "cabinet"
-	urls, _ := s.GetUrlsByClientID(client.ID)
+
+	urls, _ := s.GetUrlsByClientID(client.TgUserId)
 	if len(urls) == 0 {
 		text = "Нету созданных ссылок"
 	}
-	rows := make([][]tgbotapi.InlineKeyboardButton, len(urls)+1)
 	for i := 0; i < len(urls); i++ {
-
 		desc := "Нет описания"
-		if urls[i].Description != "" {
-			desc = urls[i].Description
-		}
-		callbackData := "detailLink|" + strconv.FormatUint(uint64(urls[i].ID), 10)
-		btnText := "https://" + urls[i].Domain.Domain + "/" + urls[i].From + "|" + desc
+
+		btnText := urls[i].From + "|" + desc
+
 		if urls[i].Active == true {
 			btnText = "✅ " + btnText
 		} else {
 			btnText = "❌ " + btnText
 		}
-		rows[i] = tgbotapi.NewInlineKeyboardRow(tgbotapi.InlineKeyboardButton{
-			Text:         btnText,
-			CallbackData: &callbackData,
-		})
+
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(btnText, "detailLink|"+strconv.FormatUint(uint64(urls[i].ID), 10)),
+		))
 	}
 
-	rows[len(urls)] = tgbotapi.NewInlineKeyboardRow(tgbotapi.InlineKeyboardButton{
-		Text:         "В кабинет",
-		CallbackData: &backBtnCB,
-	})
-	buttons = rows
+	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("В кабинет", "cabinet"),
+	))
 
 	keyboard = tgbotapi.NewInlineKeyboardMarkup(buttons...)
 

@@ -17,7 +17,7 @@ func DomainSettingsMessage(client telegramProfile.TelegramProfile, conn *gorm.DB
 	var keyboard tgbotapi.InlineKeyboardMarkup
 	backBtnCB := "cabinet"
 	newDomainBtnCB := "wait_input_domain"
-	domains, _ := s.GetDomainsByClientID(client.ID)
+	domains, _ := s.GetDomainsByClientID(client.TgUserId)
 
 	if len(domains) == 0 {
 		text = "Нет подключенных доменов"

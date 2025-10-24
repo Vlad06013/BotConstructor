@@ -11,19 +11,21 @@ import (
 )
 
 func ChangeLinkDestinationMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, urlId uint) external.TextMessage {
-
+	var text string
 	s := url.Storage{DB: conn}
-	url, _ := s.GetUrlByID(urlId)
-	if url == nil {
 
+	currentUrl, _ := s.GetUrlByID(urlId)
+	if currentUrl != nil {
+		text = "Окей нахуй, введи сюда новую конечную точнку для ссылки " + currentUrl.From
+	} else {
+		text = "Ошибка"
 	}
-	text := "Окей нахуй, введи сюда новую конечную точнку для ссылки https://" + url.Domain.Domain + "/" + url.From
 	buttons := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В кабинет", "cabinet"),
 		),
 	)
-	client.NextMessage = "save_destination_link|" + strconv.FormatUint(uint64(url.ID), 10)
+	client.NextMessage = "save_destination_link|" + strconv.FormatUint(uint64(currentUrl.ID), 10)
 	c := telegramProfile.Storage{DB: conn}
 	c.UpdateClient(client)
 

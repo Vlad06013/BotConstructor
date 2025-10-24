@@ -13,20 +13,23 @@ import (
 func DetailLinkMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, urlId uint) external.TextMessage {
 
 	s := url.Storage{DB: conn}
-	url, _ := s.GetUrlByID(urlId)
-	if url == nil {
+	var text string
+	currentUrl, _ := s.GetUrlByID(urlId)
+	if currentUrl != nil {
+		text = "Ссылка: <b>https://" + currentUrl.From + "</b>\n\nВедёт: <b>" + currentUrl.To + "</b>\n\n" + "Комментарий: \n" + currentUrl.Description
+	} else {
+		text = "Ошибка"
 	}
-	text := "Ссылка: <b>https://" + url.Domain.Domain + "/" + url.From + "</b>\n\nВедёт: <b>" + url.To + "</b>\n\n" + "Комментарий: \n" + url.Description
 
 	buttons := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Изменить конечную точку", "changeLinkDestination|"+strconv.FormatUint(uint64(url.ID), 10)),
+			tgbotapi.NewInlineKeyboardButtonData("Изменить конечную точку", "changeLinkDestination|"+strconv.FormatUint(uint64(currentUrl.ID), 10)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Удалить эту ссылку", "deleteLink|"+strconv.FormatUint(uint64(url.ID), 10)),
+			tgbotapi.NewInlineKeyboardButtonData("Удалить эту ссылку", "deleteLink|"+strconv.FormatUint(uint64(currentUrl.ID), 10)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Изменить комментарий", "changeComment|"+strconv.FormatUint(uint64(url.ID), 10)),
+			tgbotapi.NewInlineKeyboardButtonData("Изменить комментарий", "changeComment|"+strconv.FormatUint(uint64(currentUrl.ID), 10)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Назад", "linkSettings"),

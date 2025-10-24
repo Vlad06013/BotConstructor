@@ -13,29 +13,48 @@ type Storage struct {
 	*gorm.DB
 }
 
-func (r *Storage) UpdateDomain(domain Domains) *Domains {
+func (r *Storage) GetDomainsByClientID(tgUserId int64) ([]Domains, error) {
 
-	r.Save(&Domains{
-		ID:     domain.ID,
-		Domain: domain.Domain,
-		Active: domain.Active,
-	})
-	return &domain
-}
-
-func (r *Storage) GetDomainsByClientID(tgID uint) ([]Domains, error) {
 	var domains []Domains
-	if err := r.Find(&domains, "client_id = ?", tgID).Error; err != nil {
-		return nil, err
+	var dataMap map[string]json.RawMessage
+
+	url := fmt.Sprintf("domain/get-for-client")
+
+	headers := map[string]interface{}{
+		"auth-telegram-id": strconv.FormatUint(uint64(tgUserId), 10),
 	}
+	result := ApiClientBackend.Get(url, headers)
+	err := json.Unmarshal(result.Data, &dataMap)
+
+	if tariffsData, exists := dataMap["domains"]; exists {
+		err = json.Unmarshal(tariffsData, &domains)
+		if err != nil {
+		}
+	}
+
 	return domains, nil
 }
 
-func (r *Storage) GetDomainByID(id uint) (*Domains, error) {
+func (r *Storage) GetDomainByID(tgUserId int64, id uint) (*Domains, error) {
+
 	var domain Domains
-	if err := r.First(&domain, "id = ?", id).Error; err != nil {
-		return nil, err
+	var dataMap map[string]json.RawMessage
+
+	url := fmt.Sprintf("domain/show/" + strconv.FormatUint(uint64(id), 10))
+
+	headers := map[string]interface{}{
+		"auth-telegram-id": strconv.FormatUint(uint64(tgUserId), 10),
 	}
+	result := ApiClientBackend.Get(url, headers)
+	err := json.Unmarshal(result.Data, &dataMap)
+
+	if tariffsData, exists := dataMap["domain"]; exists {
+		err = json.Unmarshal(tariffsData, &domain)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return &domain, nil
 }
 
@@ -59,7 +78,6 @@ func (r *Storage) CreateDomain(tgUserId int64, domainName string) (*Domains, err
 
 	err := json.Unmarshal(result.Data, &dataMap)
 	if err != nil {
-		// Обработка ошибочного случая
 	}
 
 	if domainData, exists := dataMap["domain"]; exists {
@@ -70,20 +88,29 @@ func (r *Storage) CreateDomain(tgUserId int64, domainName string) (*Domains, err
 
 	if errorMessage, exists := dataMap["error"]; exists {
 		_ = json.Unmarshal(errorMessage, &errorMes)
-		return nil, fmt.Errorf(errorMes) // Передаем дальше
+		return nil, fmt.Errorf(errorMes)
 	}
 
 	return &domain, nil
 }
 
-func (r *Storage) GetByNameAndClientId(domainName string, clientID uint) (*Domains, error) {
-	var domain Domains
-	if err := r.Where("domain = ? AND tg_user_id = ?", domainName, clientID).First(&domain).Error; err != nil {
-		return nil, err
-	}
-	return &domain, nil
-}
+func (r *Storage) DeleteDomainByID(tgUserId int64, id uint) bool {
+	var dataMap map[string]json.RawMessage
+	var resultDeleted bool
+	url := fmt.Sprintf("domain/" + strconv.FormatUint(uint64(id), 10))
 
-func (r *Storage) DeleteDomainByID(id uint) {
-	r.Delete(&Domains{}, id)
+	headers := map[string]interface{}{
+		"auth-telegram-id": strconv.FormatUint(uint64(tgUserId), 10),
+	}
+	result := ApiClientBackend.Delete(url, headers)
+	err := json.Unmarshal(result.Data, &dataMap)
+
+	if tariffsData, exists := dataMap["domain_deleted"]; exists {
+		err = json.Unmarshal(tariffsData, &resultDeleted)
+		if err != nil {
+			return false
+		}
+	}
+
+	return true
 }

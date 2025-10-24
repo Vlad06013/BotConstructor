@@ -6,7 +6,7 @@ import (
 	"github.com/Vlad06013/BotConstructor.git/domain/module/external"
 	"github.com/Vlad06013/BotConstructor.git/repository/domain"
 	"github.com/Vlad06013/BotConstructor.git/repository/telegramProfile"
-	"github.com/Vlad06013/BotConstructor.git/repository/url"
+	//"github.com/Vlad06013/BotConstructor.git/repository/url"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/jinzhu/gorm"
 )
@@ -14,57 +14,39 @@ import (
 func DetailDomainMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, domainId uint) external.TextMessage {
 	var buttons [][]tgbotapi.InlineKeyboardButton
 	var keyboard tgbotapi.InlineKeyboardMarkup
+	urlLength := "0"
 	s := domain.Storage{DB: conn}
-	u := url.Storage{DB: conn}
-	backBtnCB := "domainSettings"
-	cabinetBtnCB := "cabinet"
-	deleteDomainBtnCB := "deleteDomain|" + strconv.FormatUint(uint64(domainId), 10)
-	domain, _ := s.GetDomainByID(domainId)
-	urls, _ := u.GetUrlByDomainID(domain.ID)
-	urlLength := strconv.FormatUint(uint64(len(urls)), 10)
+	domainCurrent, _ := s.GetDomainByID(client.TgUserId, domainId)
+	urls := domainCurrent.Urls
+	urlLength = strconv.FormatUint(uint64(len(urls)), 10)
 
-	text := "Сейчас на домене " + domain.Domain + " привязано ссылок:" + urlLength + ". Вот они:"
+	text := "Сейчас на домене " + domainCurrent.Domain + " привязано ссылок:" + urlLength + ". Вот они:"
 
 	if len(urls) == 0 {
 		text = "Нет подключенных ссылок"
 	}
-	rows := make([][]tgbotapi.InlineKeyboardButton, len(urls)+2)
 	for i := 0; i < len(urls); i++ {
-		callbackData := "detailLink|" + strconv.FormatUint(uint64(urls[i].ID), 10)
-		btnText := "https://" + domain.Domain + "/" + urls[i].From + "|" + urls[i].Description
+		btnText := "https://" + domainCurrent.Domain + "/" + urls[i].From + "|" + urls[i].Description
 		if urls[i].Active == true {
 			btnText = "✅ " + btnText
 		} else {
 			btnText = "❌ " + btnText
 		}
-		rows[i] = tgbotapi.NewInlineKeyboardRow(tgbotapi.InlineKeyboardButton{
-			Text:         btnText,
-			CallbackData: &callbackData,
-		})
+
+		buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(btnText, "detailLink|"+strconv.FormatUint(uint64(urls[i].ID), 10)),
+		))
 	}
-	rows[len(urls)] = tgbotapi.NewInlineKeyboardRow(tgbotapi.InlineKeyboardButton{
-		Text:         "Удалить нахуй этот домен и все ссылки",
-		CallbackData: &deleteDomainBtnCB,
-	})
-	rows[len(urls)+1] = tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.InlineKeyboardButton{
-			Text:         "Назад",
-			CallbackData: &backBtnCB,
-		},
-		tgbotapi.InlineKeyboardButton{
-			Text:         "В кабинет",
-			CallbackData: &cabinetBtnCB,
-		},
-	)
-	//rows[len(urls)] = tgbotapi.NewInlineKeyboardRow(tgbotapi.InlineKeyboardButton{
-	//	Text:         "Удалить нахуй этот домен и все ссылки",
-	//	CallbackData: &deleteDomainBtnCB,
-	//})
-	//rows[len(urls)+1] = tgbotapi.NewInlineKeyboardRow(tgbotapi.InlineKeyboardButton{
-	//	Text:         "Назад",
-	//	CallbackData: &backBtnCB,
-	//})
-	buttons = rows
+
+	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Удалить нахуй этот домен и все ссылки",
+			"deleteDomain|"+strconv.FormatUint(uint64(domainId), 10)),
+	))
+
+	buttons = append(buttons, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Назад", "domainSettings"),
+		tgbotapi.NewInlineKeyboardButtonData("В кабинет", "cabinet"),
+	))
 
 	keyboard = tgbotapi.NewInlineKeyboardMarkup(buttons...)
 	mess := external.TextMessage{

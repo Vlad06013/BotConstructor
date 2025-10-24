@@ -8,12 +8,15 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func ConfirmDeleteDomainMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, urlId uint) external.TextMessage {
+func ConfirmDeleteDomainMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, domainId uint) external.TextMessage {
 
-	//s := url.Storage{DB: conn}
 	d := domain.Storage{DB: conn}
-	d.DeleteDomainByID(urlId)
+	deleted := d.DeleteDomainByID(client.TgUserId, domainId)
 	text := "Окей мы всё нахуй удалили. Иди нахуй"
+
+	if !deleted {
+		text = "Ошибка удаления. Иди нахуй"
+	}
 
 	buttons := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(

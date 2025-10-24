@@ -15,26 +15,24 @@ type Storage struct {
 
 func (r *Storage) TariffPayment(tgUserId int64, tariffId uint) (Payment, error) {
 	var payment Payment
+	var dataMap map[string]json.RawMessage
+
 	url := fmt.Sprintf("order/buy-tariff")
 	body := map[string]interface{}{
 		"tariff_id": tariffId,
 	}
-
 	headers := map[string]interface{}{
 		"auth-telegram-id": strconv.FormatUint(uint64(tgUserId), 10),
 	}
 	result := ApiClientBackend.Post(url, body, headers)
 
-	var dataMap map[string]json.RawMessage
 	err := json.Unmarshal(result.Data, &dataMap)
 	if err != nil {
-		// Обработка ошибочного случая
 	}
 
 	if paymentData, exists := dataMap["payment"]; exists {
 		err = json.Unmarshal(paymentData, &payment)
 		if err != nil {
-			// обработка ошибки
 		}
 	}
 

@@ -12,15 +12,20 @@ import (
 
 func DeleteLinkMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, urlId uint) external.TextMessage {
 
+	var text string
 	s := url.Storage{DB: conn}
-	url, _ := s.GetUrlByID(urlId)
-	if url == nil {
+	currentUrl, _ := s.GetUrlByID(urlId)
+	if currentUrl == nil {
+		text = "Ошибка"
+
+	} else {
+		text = "Удалить ссылку " + currentUrl.From + "\n Которая ведет сюда: \n" + currentUrl.To
 	}
-	text := "Удалить ссылку https://" + url.Domain.Domain + "/" + url.From + "\n Которая ведет сюда: \n" + url.To
+	//text := "Удалить ссылку https://" + url.Domain.Domain + "/" + currentUrl.From + "\n Которая ведет сюда: \n" + currentUrl.To
 
 	buttons := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Удалить", "confirmDeleteLink|"+strconv.FormatUint(uint64(url.ID), 10)),
+			tgbotapi.NewInlineKeyboardButtonData("Удалить", "confirmDeleteLink|"+strconv.FormatUint(uint64(currentUrl.ID), 10)),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("В кабинет", "cabinet"),

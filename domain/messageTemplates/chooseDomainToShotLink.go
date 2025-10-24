@@ -16,7 +16,7 @@ func ChooseDomainToShotLinkMessage(client telegramProfile.TelegramProfile, conn 
 	var buttons [][]tgbotapi.InlineKeyboardButton
 	var keyboard tgbotapi.InlineKeyboardMarkup
 	backBtnCB := "cabinet"
-	domains, _ := s.GetDomainsByClientID(client.ID)
+	domains, _ := s.GetDomainsByClientID(client.TgUserId)
 
 	if len(domains) == 0 {
 		text = "Нет подключенных доменов"

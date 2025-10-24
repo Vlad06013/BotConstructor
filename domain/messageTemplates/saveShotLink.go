@@ -38,6 +38,7 @@ func parseUrl(s string) (string, string) {
 
 func SaveInputShotLinkMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, message *tgbotapi.Message, domainId uint) external.TextMessage {
 
+	var text string
 	s := url.Storage{DB: conn}
 	host, _ := parseUrl(message.Text)
 
@@ -51,10 +52,8 @@ func SaveInputShotLinkMessage(client telegramProfile.TelegramProfile, conn *gorm
 		return mess
 	}
 	d := domain.Storage{DB: conn}
-	domainFound, _ := d.GetDomainByID(domainId)
+	domainFound, _ := d.GetDomainByID(client.TgUserId, domainId)
 
-	//domainFound, _ := d.GetByNameAndClientId(host, client.ID)
-	//
 	if domainFound == nil {
 		text := "Не найден подключенный домен:  <b>" + host + " </b> \n"
 
@@ -64,23 +63,18 @@ func SaveInputShotLinkMessage(client telegramProfile.TelegramProfile, conn *gorm
 		}
 		return mess
 	}
-	shotLink := randSeq(6)
 
-	newUrl := url.Urls{
-		DomainId:    domainId,
-		From:        shotLink,
-		To:          message.Text,
-		Description: "",
-		Active:      false,
+	createdUrl, err := s.CreateUrl(client.TgUserId, domainId, message.Text)
+
+	if err != nil {
+		text = err.Error()
+	} else {
+		text = "Вот твоя ссылка пидарас:  <b>" + createdUrl.From + " </b> \n" +
+			"Теперь она ведет на: \n <b>" + createdUrl.To + " </b> \n "
 	}
-	s.CreateUrl(newUrl)
-
 	client.NextMessage = ""
 	c := telegramProfile.Storage{DB: conn}
 	c.UpdateClient(client)
-
-	text := "Вот твоя ссылка пидарас:  <b>https://" + domainFound.Domain + "/" + shotLink + " </b> \n" +
-		"Теперь она ведет на: \n <b>" + message.Text + " </b> \n "
 
 	buttons := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(

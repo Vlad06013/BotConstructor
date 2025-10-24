@@ -24,10 +24,10 @@ func send(uri string, method string, body interface{}, headers interface{}) (res
 	jsonData, err := json.Marshal(body)
 
 	req, err := http.NewRequest(method, url+uri, bytes.NewBuffer(jsonData))
-	//fmt.Println(jsonData)
 
 	// Устанавливаем заголовки
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
 
 	headersMap, _ := headers.(map[string]interface{})
 	value, exists := headersMap["auth-telegram-id"]
@@ -40,12 +40,14 @@ func send(uri string, method string, body interface{}, headers interface{}) (res
 	client := &http.Client{}
 	resp, err = client.Do(req)
 	if err != nil {
-		// обработка ошибки
 	}
 
 	if resp.StatusCode != http.StatusOK {
 
 		fmt.Println("Получен неожиданный статус:", resp.Status)
+		errorMessage, _ := decode(resp)
+
+		fmt.Println("Ответ:", errorMessage)
 		defer resp.Body.Close()
 
 		return
@@ -70,6 +72,13 @@ func decode(resp *http.Response) (response ApiResponse, err error) {
 
 func Get(uri string, headers interface{}) ApiResponse {
 	resp, _ := send(uri, http.MethodGet, nil, headers)
+	result, _ := decode(resp)
+
+	return result
+}
+
+func Delete(uri string, headers interface{}) ApiResponse {
+	resp, _ := send(uri, http.MethodDelete, nil, headers)
 	result, _ := decode(resp)
 
 	return result

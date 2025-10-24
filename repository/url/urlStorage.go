@@ -1,8 +1,11 @@
 package url
 
 import (
-	"time"
+	"encoding/json"
+	"fmt"
+	"strconv"
 
+	"github.com/Vlad06013/BotConstructor.git/domain/infrastructure/external/ApiClientBackend"
 	"github.com/jinzhu/gorm"
 )
 
@@ -31,22 +34,41 @@ func (r *Storage) DeleteUrlByID(id uint) {
 	r.Delete(&Urls{}, id)
 }
 
-func (r *Storage) CreateUrl(url Urls) *Urls {
+func (r *Storage) CreateUrl(tgUserId int64, domainId uint, to string) (*Urls, error) {
 
-	location, _ := time.LoadLocation("Europe/Moscow")
-	dateTime := time.Now().In(location).Format("2006-01-02 15:04:05")
+	var urlCreated Urls
+	var errorMes string
+	var dataMap map[string]json.RawMessage
 
-	domain := Urls{
-		DomainId:    url.DomainId,
-		From:        url.From,
-		To:          url.To,
-		Description: url.Description,
-		Active:      url.Active,
-		CreatedAt:   dateTime,
-		UpdatedAt:   dateTime,
+	url := fmt.Sprintf("url")
+
+	params := map[string]interface{}{
+		"domain_id": strconv.FormatUint(uint64(domainId), 10),
+		"to":        to,
 	}
-	r.Create(&domain)
-	return &domain
+
+	headers := map[string]interface{}{
+		"auth-telegram-id": strconv.FormatUint(uint64(tgUserId), 10),
+	}
+
+	result := ApiClientBackend.Post(url, params, headers)
+
+	err := json.Unmarshal(result.Data, &dataMap)
+	if err != nil {
+	}
+
+	if urlData, exists := dataMap["url"]; exists {
+		err = json.Unmarshal(urlData, &urlCreated)
+		if err != nil {
+		}
+	}
+
+	if errorMessage, exists := dataMap["error"]; exists {
+		_ = json.Unmarshal(errorMessage, &errorMes)
+		return nil, fmt.Errorf(errorMes)
+	}
+
+	return &urlCreated, nil
 }
 
 func (r *Storage) UpdateUrlDestination(to string, urlId uint) {
@@ -57,17 +79,25 @@ func (r *Storage) UpdateUrlComment(description string, urlId uint) {
 	r.Model(&Urls{}).Where("id =?", urlId).Update("description", description)
 }
 
-func (r *Storage) GetUrlsByClientID(tgID uint) ([]Urls, error) {
+func (r *Storage) GetUrlsByClientID(tgUserId int64) ([]Urls, error) {
+
 	var urls []Urls
+	var dataMap map[string]json.RawMessage
 
-	err := r.DB.
-		Joins("JOIN domains ON urls.domain_id = domains.id").
-		Preload("Domain").
-		Where("domains.client_id = ?", tgID).
-		Find(&urls).Error
+	url := fmt.Sprintf("url/get-for-client")
 
-	if err != nil {
-		return nil, err
+	headers := map[string]interface{}{
+		"auth-telegram-id": strconv.FormatUint(uint64(tgUserId), 10),
 	}
+	result := ApiClientBackend.Get(url, headers)
+	err := json.Unmarshal(result.Data, &dataMap)
+
+	if urlsData, exists := dataMap["urls"]; exists {
+		err = json.Unmarshal(urlsData, &urls)
+		if err != nil {
+		}
+	}
+
 	return urls, nil
+
 }

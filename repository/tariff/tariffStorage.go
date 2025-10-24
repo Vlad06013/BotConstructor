@@ -15,6 +15,7 @@ type Storage struct {
 
 func (r *Storage) Get(tgUserId int64) ([]Tariffs, error) {
 	var tariffs []Tariffs
+	var dataMap map[string]json.RawMessage
 
 	url := fmt.Sprintf("tariff")
 
@@ -22,18 +23,12 @@ func (r *Storage) Get(tgUserId int64) ([]Tariffs, error) {
 		"auth-telegram-id": strconv.FormatUint(uint64(tgUserId), 10),
 	}
 	result := ApiClientBackend.Get(url, headers)
-
-	var dataMap map[string]json.RawMessage
 	err := json.Unmarshal(result.Data, &dataMap)
-	if err != nil {
-		// В `data` может быть не объект, а другой формат
-		// Обработка ошибочного случая
-	}
+
 	// Проверка наличия ключа "tariffs"
 	if tariffsData, exists := dataMap["tariffs"]; exists {
 		err = json.Unmarshal(tariffsData, &tariffs)
 		if err != nil {
-			// обработка ошибки
 		}
 
 		//for _, item := range tariffs {
@@ -48,6 +43,8 @@ func (r *Storage) Get(tgUserId int64) ([]Tariffs, error) {
 func (r *Storage) GetById(tgUserId int64, tariffId uint) (*Tariffs, error) {
 
 	var tariff Tariffs
+	var dataMap map[string]json.RawMessage
+
 	url := fmt.Sprintf("tariff/show/" + strconv.FormatUint(uint64(tariffId), 10))
 
 	headers := map[string]interface{}{
@@ -56,7 +53,6 @@ func (r *Storage) GetById(tgUserId int64, tariffId uint) (*Tariffs, error) {
 
 	result := ApiClientBackend.Get(url, headers)
 
-	var dataMap map[string]json.RawMessage
 	err := json.Unmarshal(result.Data, &dataMap)
 	if err != nil {
 		// Обработка ошибочного случая
@@ -68,13 +64,15 @@ func (r *Storage) GetById(tgUserId int64, tariffId uint) (*Tariffs, error) {
 			return nil, nil
 		}
 		return &tariff, nil
-
 	}
 	return nil, nil
 }
 
 func (r *Storage) GetMy(tgUserId int64) (*MyTariff, error) {
 	var myTariff MyTariff
+	var dataMap map[string]json.RawMessage
+	var errorMes string
+
 	url := fmt.Sprintf("tariff/get-my")
 	headers := map[string]interface{}{
 		"auth-telegram-id": strconv.FormatUint(uint64(tgUserId), 10),
@@ -82,8 +80,6 @@ func (r *Storage) GetMy(tgUserId int64) (*MyTariff, error) {
 
 	result := ApiClientBackend.Get(url, headers)
 
-	fmt.Print(result)
-	var dataMap map[string]json.RawMessage
 	err := json.Unmarshal(result.Data, &dataMap)
 	if err != nil {
 		// Обработка ошибочного случая
@@ -92,11 +88,15 @@ func (r *Storage) GetMy(tgUserId int64) (*MyTariff, error) {
 	if tariffData, exists := dataMap["tariff"]; exists {
 		err = json.Unmarshal(tariffData, &myTariff)
 		if err != nil {
-			return nil, nil
+
 		}
 		return &myTariff, nil
-
 	}
+	if errorMessage, exists := dataMap["error"]; exists {
+		_ = json.Unmarshal(errorMessage, &errorMes)
+		return nil, fmt.Errorf(errorMes)
+	}
+
 	return nil, nil
 
 }
@@ -104,6 +104,8 @@ func (r *Storage) GetMy(tgUserId int64) (*MyTariff, error) {
 func (r *Storage) GetFreeTariff(tgUserId int64) (*Tariffs, error) {
 
 	var tariff Tariffs
+	var dataMap map[string]json.RawMessage
+
 	url := fmt.Sprintf("tariff/free-tariff")
 
 	headers := map[string]interface{}{
@@ -112,10 +114,8 @@ func (r *Storage) GetFreeTariff(tgUserId int64) (*Tariffs, error) {
 
 	result := ApiClientBackend.Get(url, headers)
 
-	var dataMap map[string]json.RawMessage
 	err := json.Unmarshal(result.Data, &dataMap)
 	if err != nil {
-		// Обработка ошибочного случая
 	}
 
 	if tariffData, exists := dataMap["tariff"]; exists {
@@ -124,23 +124,23 @@ func (r *Storage) GetFreeTariff(tgUserId int64) (*Tariffs, error) {
 			return nil, nil
 		}
 		return &tariff, nil
-
 	}
 	return nil, nil
 }
 
 func (r *Storage) StartFreeTariff(tgUserId int64) (*Tariffs, error) {
 	var connectedTariff Tariffs
+	var dataMap map[string]json.RawMessage
+
 	url := fmt.Sprintf("tariff/start-free-tariff")
+
 	headers := map[string]interface{}{
 		"auth-telegram-id": strconv.FormatUint(uint64(tgUserId), 10),
 	}
 
 	result := ApiClientBackend.Post(url, nil, headers)
-
-	fmt.Print(result)
-	var dataMap map[string]json.RawMessage
 	err := json.Unmarshal(result.Data, &dataMap)
+
 	if err != nil {
 		// Обработка ошибочного случая
 	}
@@ -151,8 +151,6 @@ func (r *Storage) StartFreeTariff(tgUserId int64) (*Tariffs, error) {
 			return nil, nil
 		}
 		return &connectedTariff, nil
-
 	}
 	return nil, nil
-
 }

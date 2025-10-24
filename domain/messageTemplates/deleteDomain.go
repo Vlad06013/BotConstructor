@@ -13,7 +13,7 @@ import (
 func DeleteDomainMessage(client telegramProfile.TelegramProfile, conn *gorm.DB, domainId uint) external.TextMessage {
 
 	s := domain.Storage{DB: conn}
-	currentDomain, _ := s.GetDomainByID(domainId)
+	currentDomain, _ := s.GetDomainByID(client.TgUserId, domainId)
 	if currentDomain == nil {
 	}
 	text := "Братишка ты уверен? Это полностью удалит информацию об этом редиректе из нашего бота и все ссылки которые были прикриплены к этому домену"
